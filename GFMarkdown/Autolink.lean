@@ -34,18 +34,25 @@ def isValidHostChar (c : Char) : Bool :=
 -- an underscore in either of its last two dot-separated segments (bare host names disallow
 -- underscores; full domain names allow them). `allowShort` skips the "must contain a dot"
 -- requirement (used after `://`, where a bare host like `http://localhost` is still valid;
--- `www.` links always require one, since `www.foo` alone isn't a recognizable domain). Doesn't
--- replicate the source's escaped-character skip inside a domain: no vendored example needs it,
--- and a stray backslash there is vanishingly rare in practice.
+-- `www.` links always require one, since `www.foo` alone isn't a recognizable domain).
+-- Like cmark-gfm, a backslash with two following characters skips to the next character,
+-- which must still be classified for underscores and domain separators.
 def checkDomainGo : Nat → List Char → Nat → Nat → Nat → Nat → Nat × Nat × Nat × Nat
   | 0, _, consumed, np, u1, u2 => (consumed, np, u1, u2)
   | _ + 1, [], consumed, np, u1, u2 => (consumed, np, u1, u2)
   | _ + 1, [_], consumed, np, u1, u2 => (consumed, np, u1, u2)
   | fuel + 1, c :: rest, consumed, np, u1, u2 =>
-    if c == '_' then checkDomainGo fuel rest (consumed + 1) np u1 (u2 + 1)
-    else if c == '.' then checkDomainGo fuel rest (consumed + 1) (np + 1) u2 0
-    else if isValidHostChar c || c == '-' then checkDomainGo fuel rest (consumed + 1) np u1 u2
-    else (consumed, np, u1, u2)
+    let (current, remaining, width) :=
+      if c == '\\' then
+        match rest with
+        | next :: last :: tail => (next, last :: tail, 2)
+        | _ => (c, rest, 1)
+      else (c, rest, 1)
+    if current == '_' then checkDomainGo fuel remaining (consumed + width) np u1 (u2 + 1)
+    else if current == '.' then checkDomainGo fuel remaining (consumed + width) (np + 1) u2 0
+    else if isValidHostChar current || current == '-' then
+      checkDomainGo fuel remaining (consumed + width) np u1 u2
+    else (consumed + width - 1, np, u1, u2)
 
 def checkDomain (allowShort : Bool) (chars : List Char) : Nat :=
   let (consumed, np, u1, u2) := checkDomainGo (chars.length + 1) (chars.drop 1) 1 0 0 0
