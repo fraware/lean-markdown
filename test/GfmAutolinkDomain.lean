@@ -7,6 +7,11 @@ meta import CheckExampleGfm
 
 @[expose] public section
 
+-- The C scanner advances past the first backslash even when the next
+-- character terminates the domain scan.
+#guard GFMarkdown.checkDomain true "a\\\\xb".toList == 2
+#guard GFMarkdown.checkDomain true "a\\?b".toList == 2
+
 -- A literal backslash followed by an underscore is examined by cmark-gfm's
 -- domain scanner, so these candidates fail host validation.
 #guard checkExampleGfm 1 "Backslash in autolink domain"
