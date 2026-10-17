@@ -52,7 +52,7 @@ def checkDomainGo : Nat → List Char → Nat → Nat → Nat → Nat → Nat ×
     else if current == '.' then checkDomainGo fuel remaining (consumed + width) (np + 1) u2 0
     else if isValidHostChar current || current == '-' then
       checkDomainGo fuel remaining (consumed + width) np u1 u2
-    else (consumed, np, u1, u2)
+    else (consumed + width - 1, np, u1, u2)
 
 def checkDomain (allowShort : Bool) (chars : List Char) : Nat :=
   let (consumed, np, u1, u2) := checkDomainGo (chars.length + 1) (chars.drop 1) 1 0 0 0
