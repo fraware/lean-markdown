@@ -27,4 +27,4 @@ globs = ["CheckExample", "SpecGuards", "NoEmbeddedHtml", "GfmNoEmbeddedHtml", "A
   "GfmHtmlWellFormedness", "SanitizeSafety", "GfmSanitizeSafety", "SanitizeExamples",
   "CheckExampleMath", "MathGuards", "MathInteractionGuards", "MathDivergenceGuards",
   "MathProperties",
-  "EntityReferenceExamples", "CaseFoldingExamples"]
+  "EntityReferenceExamples", "CaseFoldingExamples", "GfmAutolinkDomain"]
